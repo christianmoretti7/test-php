@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  my_application:
+    build: .
+    links:
+      - mysqldb
+      - redisdb
+    depends_on:
+      - mysqldb
+      - redisdb
+    volumes:
+      - .:/var/www/html/
+    ports:
+      - "8080:80"
+  
+  mysqldb:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: my_database
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+  
+  redisdb:
+    image: redis:5.0-alpine
+    ports:
+      - "6379:6379"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: my_database
+      PMA_HOST: mysqldb
+    links:
+      - mysqldb
+    depends_on: 
+      - mysqldb
+    ports:
+      - 8081:80
+
+volumes:
+  mysql-data:
+    driver: local
